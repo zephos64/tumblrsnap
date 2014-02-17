@@ -42,7 +42,7 @@ public class PhotosFragment extends Fragment {
 	private static final int CROP_PHOTO_CODE = 3;
 	private static final int POST_PHOTO_CODE = 4;
 	
-	private String photoUri;
+	private Uri photoUri;
 	private Bitmap photoBitmap;
 	
 	TumblrClient client;
@@ -87,12 +87,22 @@ public class PhotosFragment extends Fragment {
 		switch(item.getItemId()) {
 			case R.id.action_take_photo:
 			{
+				
 				// Take the user to the camera app
+				Uri uri = Uri.fromFile(getOutputMediaFile());
+				photoUri = uri;
+				Log.d("DEBUG","At: " + uri.getPath());
+				
+				Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+				i.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+				startActivityForResult(i, TAKE_PHOTO_CODE);
 			}
 			break;
 			case R.id.action_use_existing:
 			{
 				// Take the user to the gallery app
+				Intent shareIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+				startActivityForResult(shareIntent, PICK_PHOTO_CODE);
 			}
 			break;
 		}
@@ -106,12 +116,13 @@ public class PhotosFragment extends Fragment {
 				// Extract the photo that was just taken by the camera
 				
 				// Call the method below to trigger the cropping
-				// cropPhoto(photoUri)
+				cropPhoto(photoUri);
 			} else if (requestCode == PICK_PHOTO_CODE) {
 				// Extract the photo that was just picked from the gallery
+				Log.d("DEBUG", "Photo extracted at " + data.getData());
 				
 				// Call the method below to trigger the cropping
-				// cropPhoto(photoUri)
+				cropPhoto(data.getData());
 			} else if (requestCode == CROP_PHOTO_CODE) {
 				photoBitmap = data.getParcelableExtra("data");
 				startPreviewPhotoActivity();
